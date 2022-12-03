@@ -1,14 +1,9 @@
-const express = require("express");
-const app = express();
-const morgan = require("morgan");
+const config = require("./src/config");
+const app = require("./index");
+const connectDb = require("./src/api/db");
 
-//routes
-const authRouter = require("./routes/auth");
-
-app.use(morgan("logger"));
-//routes
-app.use("api/v1", authRouter);
-
-app.listen(9000, ()=>{
-    console.log("the server is running at port 9000");
-})
+connectDb().then(() => {
+  app.listen(config.PORT, () => {
+    console.log(`Server started at ${config.PORT}`);
+  });
+});
