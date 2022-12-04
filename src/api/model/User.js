@@ -33,7 +33,7 @@ const userSchema = new Schema({
     },
     amount: {
         type: Schema.Type.ObjectId,
-        ref: "Amount"
+        ref: "Amount",
         required: true
     },
     isVerified: {
