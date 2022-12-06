@@ -20,21 +20,22 @@ const userSchema = new Schema({
         required: true
     },
     services: {
-        type: String,
-        required: true
+        type: Schema.Types.ObjectId,
+        ref: "Service",
+        required: false
     },
     profile_image: {
         type: String,
-        required: true
+        required: false
     },
     header_image: {
         type: String,
-        required: true
+        required: false
     },
     amount: {
-        type: Schema.Type.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Amount",
-        required: true
+        required: false
     },
     isVerified: {
         type: Boolean,
