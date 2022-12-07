@@ -1,11 +1,12 @@
 const User = require("../model/User");
 const bcrypt = require("bcrypt");
 const registerSchema = require("../validationSchema/registerSchema");
-const { messages } = require("../validationSchema/registerSchema");
+const jwt = require("jsonwebtoken");
 
 const { statusMessages } = require("../constants/messages");
 const statusCodes = require("../constants/status");
 const { checkPassword, hashPassword } = require("../../utils/passwordUtil");
+const config = require("../../config");
 
 exports.register = async (req, res, next) => {
   const { name, email, password, role } = req.body;
@@ -98,4 +99,29 @@ module.exports.login = (req, res) => {
         },
       });
     });
+};
+
+module.exports.refreshToken = (req, res) => {
+  let token = req.headers.authorization
+    ? req.headers.authorization.split(" ")[1]
+    : null;
+
+  jwt.verify(token, config.SECRET_JWT, (err, decoded) => {
+    if (err) {
+      return res.status(406).json({
+        succes: false,
+        data: {
+          message: "Unathorized",
+        },
+      });
+    } else {
+      token = User.createSessionToken(decoded._id, decoded.role);
+      return res.status(statusCodes.SUCCESS).json({
+        success: true,
+        data: {
+          token,
+        },
+      });
+    }
+  });
 };
