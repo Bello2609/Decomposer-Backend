@@ -3,96 +3,66 @@ const jsonwebtoken = require("jsonwebtoken");
 const { Schema } = mongoose;
 const CONFIG = require("../../config");
 
-const userSchema = new Schema({
-<<<<<<< HEAD
+const userRoles = {
+  buyer: "buyer",
+  seller: "seller",
+};
+
+const userSchema = new Schema(
+  {
     name: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     email: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
+      unique: true,
     },
     password: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     role: {
-        type: String,
-        required: true
+      type: String,
+      enum: Object.values(userRoles),
+      required: true,
     },
     services: {
-        type: Schema.Types.ObjectId,
-        ref: "Service",
-        required: false
+      type: Schema.Types.ObjectId,
+      ref: "Service",
+      required: false,
     },
     profile_image: {
-        type: String,
-        required: false
+      type: String,
+      required: false,
     },
     header_image: {
-        type: String,
-        required: false
+      type: String,
+      required: false,
     },
     amount: {
-        type: Schema.Types.ObjectId,
-        ref: "Amount",
-        required: false
+      type: Schema.Types.ObjectId,
+      ref: "Amount",
+      required: false,
     },
     isVerified: {
-        type: Boolean,
-        required: true
+      type: Boolean,
+      default: false,
+      required: true,
     },
     userToken: String,
-    userTokenExpiration: Date
-=======
-  name: {
-    type: String,
-    required: true,
+    userTokenExpiration: Date,
   },
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    required: true,
-  },
-  services: {
-    type: Schema.Types.ObjectId,
-    ref: "Service",
-    required: false,
-  },
-  profile_image: {
-    type: String,
-    required: false,
-  },
-  header_image: {
-    type: String,
-    required: false,
-  },
-  amount: {
-    type: Schema.Types.ObjectId,
-    ref: "Amount",
-    required: false,
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-    required: true,
-  },
-});
+  { timestamps: true }
+);
 
 // Create Session for user
-function createSessionToken(_id) {
+function createSessionToken(_id, role) {
   const sessionToken = jsonwebtoken.sign(
     {
       _id,
-      type: "User",
+      type: role,
       timestamp: Date.now(),
     },
     CONFIG.SECRET_JWT,
@@ -100,7 +70,6 @@ function createSessionToken(_id) {
   );
   return sessionToken;
 }
->>>>>>> 2038d32929bd89006129666807e513cba4641879
 
 module.exports = mongoose.model("User", userSchema);
 module.exports.createSessionToken = createSessionToken;
