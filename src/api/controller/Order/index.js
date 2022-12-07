@@ -2,9 +2,10 @@ const { getLoggedUserId } = require("../../../utils/generalUtils");
 const Order = require("../../model/Order");
 const orderSchema = require("../../validationSchema/orderSchema");
 const statusCodes = require("../../constants/status");
+const mongoose = require("mongoose");
 
 // only a buyer can create order
-module.exports.createOrder = (req, res) => {
+module.exports.createOrder = async (req, res) => {
   let { status, orderPrice, sellerId } = req.body;
 
   const { error } = orderSchema.validate(
@@ -22,14 +23,13 @@ module.exports.createOrder = (req, res) => {
     });
   }
 
-  let buyerId = getLoggedUserId(req.headers.authorization);
-  console.log(buyerId, 'The buyer ID')
+  let buyerId = await getLoggedUserId(req.headers.authorization);
 
   let order = new Order({
     status,
     orderPrice,
     orderBy: {
-      sellerId,
+      sellerId: mongoose.Types.ObjectId(sellerId),
       buyerId,
     },
   });

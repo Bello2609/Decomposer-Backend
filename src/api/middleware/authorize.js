@@ -9,9 +9,11 @@ module.exports.authorize = (req, res, next) => {
     if (token) {
       jwt.verify(token, config.SECRET_JWT, (err, decoded) => {
         if (err) {
-          return res.status(statusCodes.FORBIDDEN).json({
+          return res.status(statusCodes.UNAUTHORIZED).json({
             status: false,
-            message: err,
+            data: {
+              message: err,
+            },
           });
         } else {
           next();
@@ -25,7 +27,9 @@ module.exports.authorize = (req, res, next) => {
   } else {
     return res.status(statusCodes.UNAUTHORIZED).json({
       success: false,
-      message: "No token, authorization denied",
+      data: {
+        message: "No token, authorization denied",
+      },
     });
   }
 };
