@@ -1,14 +1,65 @@
+const User = require("../model/User");
+const bcrypt = require("bcrypt");
+const registerSchema = require("../validationSchema/registerSchema");
+const { messages } = require("../validationSchema/registerSchema");
+
 const { statusMessages } = require("../constants/messages");
 const statusCodes = require("../constants/status");
-const userModel = require("../model/User");
+const { checkPassword } = require("../../utils/passwordUtil");
 
-exports.register = (req, res, next) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(statusCodes.BAD_REQUEST).json({
-      success: false,
-      message: statusMessages.PROVIDE_REQUIRED_FIELDS,
+exports.register = async (req, res, next) => {
+  const { name, email, password, role } = req.body;
+  try {
+    //check if the user already regsiter
+    const checkUser = await User.find({ email }).exec();
+    if (checkUser.length > 1) {
+      return res.status(409).json({
+        data: {
+          message: "This email already existed",
+        },
+      });
+    } else {
+      bcrypt.hash(password, 10, (err, hashPassword) => {
+        if (err) {
+          return res.status(500).json({
+            data: {
+              message: err,
+            },
+          });
+        } else {
+          const userData = {
+            name: name,
+            email: email,
+            password: hashPassword,
+            role: role,
+            isVerified: false,
+          };
+          const { error } = registerSchema.validate(userData, {
+            abortEarly: false,
+          });
+          if (error) {
+            return res.status(401).json({
+              data: {
+                message: error.details[0].message,
+              },
+            });
+          } else {
+            const user = new User(userData);
+            user.save();
+            return res.status(201).json({
+              data: {
+                message: "Your account has been created successfully",
+              },
+            });
+          }
+        }
+      });
+    }
+  } catch (err) {
+    res.status(501).json({
+      data: {
+        message: err,
+      },
     });
   }
 };
@@ -23,10 +74,9 @@ module.exports.login = (req, res) => {
     });
   }
 
-  userModel
-    .findOne({ email })
-    .then((user) => {
-      if (!user) {
+  User.findOne({ email })
+    .then(async (user) => {
+      if (!user || !(await checkPassword(user["password"], password))) {
         return res.status(statusCodes.BAD_REQUEST).json({
           succes: false,
           message: statusMessages.INVALID_CREDENTIALS,
@@ -34,14 +84,18 @@ module.exports.login = (req, res) => {
       }
       return res.status(statusCodes.SUCCESS).json({
         success: true,
-        user,
-        token: userModel.createSessionToken(user._id),
+        data: {
+          user,
+          token: User.createSessionToken(user._id),
+        },
       });
     })
     .catch((err) => {
       return res.status(statusCodes.SERVER_ERROR).json({
         success: false,
-        message: err,
+        data: {
+          message: err,
+        },
       });
     });
 };

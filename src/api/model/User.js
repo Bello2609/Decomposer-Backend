@@ -20,35 +20,37 @@ const userSchema = new Schema({
     required: true,
   },
   services: {
-    type: String,
-    required: true,
+    type: Schema.Types.ObjectId,
+    ref: "Service",
+    required: false,
   },
   profile_image: {
     type: String,
-    required: true,
+    required: false,
   },
   header_image: {
     type: String,
-    required: true,
+    required: false,
   },
   amount: {
     type: Schema.Types.ObjectId,
     ref: "Amount",
-    required: true,
+    required: false,
   },
   isVerified: {
     type: Boolean,
+    default: false,
     required: true,
   },
 });
 
-userSchema.pre("save", function (next) {
-  const user = this;
-  if (user.isModified("password")) {
-    user["password"] = hashPassword(user["password"]);
-  }
-  next();
-});
+// userSchema.pre("save", function (next) {
+//   const user = this;
+//   if (user.isModified("password")) {
+//     user["password"] = hashPassword(user["password"]);
+//   }
+//   next();
+// });
 
 // Create Session for user
 function createSessionToken(_id) {
