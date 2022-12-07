@@ -40,8 +40,9 @@ const userSchema = new Schema({
     isVerified: {
         type: Boolean,
         required: true
-    }
-
+    },
+    userToken: String,
+    userTokenExpiration: Date
 
 })
 module.exports = mongoose.model("User", userSchema);
