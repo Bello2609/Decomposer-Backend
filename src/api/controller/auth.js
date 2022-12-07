@@ -86,7 +86,7 @@ module.exports.login = (req, res) => {
         success: true,
         data: {
           user,
-          token: User.createSessionToken(user._id),
+          token: User.createSessionToken(user._id, user.role),
         },
       });
     })
