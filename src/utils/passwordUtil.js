@@ -7,3 +7,8 @@ module.exports.checkPassword = async (hash, password) => {
   }
   return false;
 };
+
+module.exports.hashPassword = async (password) => {
+  const hashed = await bcrypt.hash(password, 10);
+  return hashed;
+};

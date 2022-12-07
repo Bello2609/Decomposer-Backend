@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const jsonwebtoken = require("jsonwebtoken");
 const { Schema } = mongoose;
+const CONFIG = require("../../config");
 
 const userSchema = new Schema({
   name: {
@@ -43,14 +44,6 @@ const userSchema = new Schema({
     required: true,
   },
 });
-
-// userSchema.pre("save", function (next) {
-//   const user = this;
-//   if (user.isModified("password")) {
-//     user["password"] = hashPassword(user["password"]);
-//   }
-//   next();
-// });
 
 // Create Session for user
 function createSessionToken(_id) {

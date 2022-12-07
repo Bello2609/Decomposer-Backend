@@ -5,7 +5,7 @@ const { messages } = require("../validationSchema/registerSchema");
 
 const { statusMessages } = require("../constants/messages");
 const statusCodes = require("../constants/status");
-const { checkPassword } = require("../../utils/passwordUtil");
+const { checkPassword, hashPassword } = require("../../utils/passwordUtil");
 
 exports.register = async (req, res, next) => {
   const { name, email, password, role } = req.body;
