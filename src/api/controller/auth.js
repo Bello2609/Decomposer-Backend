@@ -55,7 +55,6 @@ exports.register = async (req, res, next) => {
         }
       });
     }
-<<<<<<< HEAD
 }
 exports.forgetPassword = async( req, res, next )=>{
     const { email } = req.body;
@@ -92,16 +91,8 @@ exports.forgetPassword = async( req, res, next )=>{
     
 }
 exports.getNewPassword = ( req, res, next )=>{
-=======
-  } catch (err) {
-    res.status(501).json({
-      data: {
-        message: err,
-      },
-    });
-  }
+
 };
->>>>>>> 2038d32929bd89006129666807e513cba4641879
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
