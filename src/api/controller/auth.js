@@ -57,13 +57,86 @@ exports.register = async (req, res, next) => {
         }
       });
     }
+}catch(err){
+  return res.status(500).json({
+    data: {
+      message: err
+    }
+  })
+}
+}
+exports.forgetPassword = async( req, res, next )=>{
+    const { email } = req.body;
+    try{
+        crypto.randomBytes(12, (err, buffer)=>{
+            if(err){
+                return res.status(502).json({
+                    data: {
+                        message: err
+                    }
+                })
+            }
+            const token = buffer.toString("hex");
+            const user = await User.findOne({ email: email });
+            if(!user){
+                return res.status(404).json({
+                    data: {
+                        message: "This email is not registered"
+                    }
+                })
+            }
+            user.userToken = token;
+            user.userTokenExpiration = Date.now() + 3600000;
+            await user.save();
+        });
+    }catch(err){
+        return res.status(501).json({
+            data: {
+                message: err
+            }
+        })
+    } 
+}
+exports.getNewPassword = ( req, res, next )=>{
+
+};
+
+
+exports.forgetPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    crypto.randomBytes(12, async (err, buffer) => {
+      if (err) {
+        return res.status(502).json({
+          data: {
+            message: err,
+          },
+        });
+      }
+      const token = buffer.toString("hex");
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(404).json({
+          data: {
+            message: "This email is not registered",
+          },
+        });
+      }
+      user.userToken = token;
+      user.userTokenExpiration = Date.now() + 3600000;
+      await user.save();
+    });
   } catch (err) {
-    res.status(501).json({
+    return res.status(501).json({
       data: {
         message: err,
       },
     });
   }
+};
+
+exports.getNewPassword = (req, res, next) => {
+  console.log("new password");
 };
 
 exports.forgetPassword = async (req, res, next) => {
@@ -100,6 +173,7 @@ exports.forgetPassword = async (req, res, next) => {
 };
 
 exports.getNewPassword = (req, res, next) => {};
+
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
@@ -160,4 +234,6 @@ module.exports.refreshToken = (req, res) => {
       });
     }
   });
-};
+
+}
+
