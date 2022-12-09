@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const registerSchema = require("../validationSchema/registerSchema");
 const jwt = require("jsonwebtoken");
 
-const { statusMessages } = require("../constants/messages");
+const statusMessages = require("../constants/messages");
 const statusCodes = require("../constants/status");
 const { checkPassword, hashPassword } = require("../../utils/passwordUtil");
 const config = require("../../config");
@@ -119,7 +119,7 @@ module.exports.login = (req, res) => {
           message: statusMessages.INVALID_CREDENTIALS,
         });
       }
-      return res.status(statusCodes.SUCCESS).json({
+      return res.status(statusCodes.OK).json({
         success: true,
         data: {
           user,
@@ -152,7 +152,7 @@ module.exports.refreshToken = (req, res) => {
       });
     } else {
       token = User.createSessionToken(decoded._id, decoded.role);
-      return res.status(statusCodes.SUCCESS).json({
+      return res.status(statusCodes.OK).json({
         success: true,
         data: {
           token,
