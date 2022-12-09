@@ -68,7 +68,7 @@ exports.register = async (req, res, next) => {
 exports.forgetPassword = async( req, res, next )=>{
     const { email } = req.body;
     try{
-        crypto.randomBytes(12, (err, buffer)=>{
+        crypto.randomBytes(12, async(err, buffer)=>{
             if(err){
                 return res.status(502).json({
                     data: {
