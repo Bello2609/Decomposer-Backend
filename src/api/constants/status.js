@@ -6,5 +6,5 @@ module.exports = {
   METHOD_NOT_ALLOWED: 405,
   SERVER_ERROR: 500,
   CREATED: 201,
-  SUCCESS: 200,
+  OK: 200,
 };
