@@ -1,15 +1,17 @@
-const User = require("../model/User");
+const User = require("../../model/User");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-const registerSchema = require("../validationSchema/registerSchema");
+const registerSchema = require("../../validationSchema/registerSchema");
 const jwt = require("jsonwebtoken");
+//constant
+const { statusMessages } = require("../../constants/messages");
+const statusCodes = require("../../constants/status");
+//utils
+const { checkPassword, hashPassword } = require("../../../utils/passwordUtil");
+const { sendEmail } = require("../../../utils/emailUtils");
+const config = require("../../../config");
 
-const { statusMessages } = require("../constants/messages");
-const statusCodes = require("../constants/status");
-const { checkPassword, hashPassword } = require("../../utils/passwordUtil");
-const config = require("../../config");
-
-exports.register = async (req, res, next) => {
+module.exports.register = async (req, res, next) => {
   const { name, email, password, role } = req.body;
   try {
     //check if the user already regsiter
@@ -65,49 +67,13 @@ exports.register = async (req, res, next) => {
   })
 }
 }
-exports.forgetPassword = async( req, res, next )=>{
-    const { email } = req.body;
-    try{
-        crypto.randomBytes(12, (err, buffer)=>{
-            if(err){
-                return res.status(502).json({
-                    data: {
-                        message: err
-                    }
-                })
-            }
-            const token = buffer.toString("hex");
-            const user = await User.findOne({ email: email });
-            if(!user){
-                return res.status(404).json({
-                    data: {
-                        message: "This email is not registered"
-                    }
-                })
-            }
-            user.userToken = token;
-            user.userTokenExpiration = Date.now() + 3600000;
-            await user.save();
-        });
-    }catch(err){
-        return res.status(501).json({
-            data: {
-                message: err
-            }
-        })
-    } 
-}
-exports.getNewPassword = ( req, res, next )=>{
 
-};
-
-
-exports.forgetPassword = async (req, res, next) => {
+module.exports.forgetPassword = async (req, res, next) => {
   const { email } = req.body;
   try {
     crypto.randomBytes(12, async (err, buffer) => {
       if (err) {
-        return res.status(502).json({
+        return res.status(400).json({
           data: {
             message: err,
           },
@@ -115,6 +81,11 @@ exports.forgetPassword = async (req, res, next) => {
       }
       const token = buffer.toString("hex");
       const user = await User.findOne({ email: email });
+
+      //this will get the name of the user we wanna send the mail to
+      const getName = user.map(users => {
+          return users.name
+      });
       if (!user) {
         return res.status(404).json({
           data: {
@@ -125,6 +96,7 @@ exports.forgetPassword = async (req, res, next) => {
       user.userToken = token;
       user.userTokenExpiration = Date.now() + 3600000;
       await user.save();
+      sendEmail(getName, email, token);
     });
   } catch (err) {
     return res.status(501).json({
@@ -135,46 +107,30 @@ exports.forgetPassword = async (req, res, next) => {
   }
 };
 
-exports.getNewPassword = (req, res, next) => {
-  console.log("new password");
-};
-
-exports.forgetPassword = async (req, res, next) => {
-  const { email } = req.body;
-  try {
-    crypto.randomBytes(12, async (err, buffer) => {
-      if (err) {
-        return res.status(502).json({
-          data: {
-            message: err,
-          },
-        });
-      }
-      const token = buffer.toString("hex");
-      const user = await User.findOne({ email: email });
-      if (!user) {
-        return res.status(404).json({
-          data: {
-            message: "This email is not registered",
-          },
-        });
-      }
-      user.userToken = token;
-      user.userTokenExpiration = Date.now() + 3600000;
-      await user.save();
-    });
-  } catch (err) {
-    return res.status(501).json({
+module.exports.getNewPassword = async(req, res, next) => {
+  const newPassword = req.body.newpassword;
+  const token = req.params.token;
+  //check if the user token can be found on the data base
+  const user = await User.findOne({ userToken: token, userTokenExpiration: { $gt: Date.now() } });
+  if(!user){
+    return res.status(404).json({
       data: {
-        message: err,
-      },
-    });
+        message: "Invalid token or the token has expired"
+      }
+    })
+  }else{
+    const hashPassword = await hashPassword(newPassword, 10);
+    user.password = hashPassword;
+    user.userToken = undefined;
+    user.userTokenExpiration = undefined;
+    return res.status(201).json({
+      data: {
+        message: "Your password has been changed successfully"
+      }
+    })
   }
+
 };
-
-exports.getNewPassword = (req, res, next) => {};
-
-
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 

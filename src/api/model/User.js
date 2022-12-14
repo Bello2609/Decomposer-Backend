@@ -51,10 +51,13 @@ const userSchema = new Schema(
         default: false,
         required: true
     },
+
     userToken: String,
     userTokenExpiration: Date,
-    timestamps: true
-   });
+   
+    
+    
+   },{timestamps: true});
 
 
 
