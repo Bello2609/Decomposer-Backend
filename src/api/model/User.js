@@ -3,7 +3,6 @@ const jsonwebtoken = require("jsonwebtoken");
 const { Schema } = mongoose;
 const CONFIG = require("../../config");
 
-
 const userRoles = {
   buyer: "buyer",
   seller: "seller",
@@ -47,19 +46,18 @@ const userSchema = new Schema(
       required: false,
     },
     isVerified: {
-        type: Boolean,
-        default: false,
-        required: true
+      type: Boolean,
+      default: false,
+      required: true,
     },
 
     userToken: String,
     userTokenExpiration: Date,
-   
-    
-    
-   },{timestamps: true});
+   },
+   {timestamps: true}
 
 
+);
 
 // Create Session for user
 function createSessionToken(_id, role) {

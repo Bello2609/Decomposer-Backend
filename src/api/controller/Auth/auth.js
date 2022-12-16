@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const registerSchema = require("../../validationSchema/registerSchema");
 const jwt = require("jsonwebtoken");
+
 //constant
 const { statusMessages } = require("../../constants/messages");
 const statusCodes = require("../../constants/status");
@@ -67,6 +68,7 @@ module.exports.register = async (req, res, next) => {
   })
 }
 }
+
 
 module.exports.forgetPassword = async (req, res, next) => {
   const { email } = req.body;
@@ -149,7 +151,7 @@ module.exports.login = (req, res) => {
           message: statusMessages.INVALID_CREDENTIALS,
         });
       }
-      return res.status(statusCodes.SUCCESS).json({
+      return res.status(statusCodes.OK).json({
         success: true,
         data: {
           user,
@@ -182,7 +184,7 @@ module.exports.refreshToken = (req, res) => {
       });
     } else {
       token = User.createSessionToken(decoded._id, decoded.role);
-      return res.status(statusCodes.SUCCESS).json({
+      return res.status(statusCodes.OK).json({
         success: true,
         data: {
           token,
