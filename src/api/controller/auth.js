@@ -8,6 +8,7 @@ const statusMessages = require("../constants/messages");
 const statusCodes = require("../constants/status");
 const { checkPassword, hashPassword } = require("../../utils/passwordUtil");
 const config = require("../../config");
+const { getLoggedUserId } = require("../../utils/generalUtils");
 
 exports.register = async (req, res, next) => {
   const { name, email, password, role } = req.body;
@@ -57,50 +58,47 @@ exports.register = async (req, res, next) => {
         }
       });
     }
-}catch(err){
-  return res.status(500).json({
-    data: {
-      message: err
-    }
-  })
-}
-}
-exports.forgetPassword = async( req, res, next )=>{
-    const { email } = req.body;
-    try{
-        crypto.randomBytes(12, async(err, buffer)=>{
-            if(err){
-                return res.status(502).json({
-                    data: {
-                        message: err
-                    }
-                })
-            }
-            const token = buffer.toString("hex");
-            const user = await User.findOne({ email: email });
-            if(!user){
-                return res.status(404).json({
-                    data: {
-                        message: "This email is not registered"
-                    }
-                })
-            }
-            user.userToken = token;
-            user.userTokenExpiration = Date.now() + 3600000;
-            await user.save();
-        });
-    }catch(err){
-        return res.status(501).json({
-            data: {
-                message: err
-            }
-        })
-    } 
-}
-exports.getNewPassword = ( req, res, next )=>{
-
+  } catch (err) {
+    return res.status(500).json({
+      data: {
+        message: err,
+      },
+    });
+  }
 };
-
+exports.forgetPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    crypto.randomBytes(12, async (err, buffer) => {
+      if (err) {
+        return res.status(502).json({
+          data: {
+            message: err,
+          },
+        });
+      }
+      const token = buffer.toString("hex");
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(404).json({
+          data: {
+            message: "This email is not registered",
+          },
+        });
+      }
+      user.userToken = token;
+      user.userTokenExpiration = Date.now() + 3600000;
+      await user.save();
+    });
+  } catch (err) {
+    return res.status(501).json({
+      data: {
+        message: err,
+      },
+    });
+  }
+};
+exports.getNewPassword = (req, res, next) => {};
 
 exports.forgetPassword = async (req, res, next) => {
   const { email } = req.body;
@@ -174,7 +172,6 @@ exports.forgetPassword = async (req, res, next) => {
 
 exports.getNewPassword = (req, res, next) => {};
 
-
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
@@ -186,6 +183,7 @@ module.exports.login = (req, res) => {
   }
 
   User.findOne({ email })
+    .select("+password")
     .then(async (user) => {
       if (!user || !(await checkPassword(user["password"], password))) {
         return res.status(statusCodes.BAD_REQUEST).json({
@@ -193,6 +191,8 @@ module.exports.login = (req, res) => {
           message: statusMessages.INVALID_CREDENTIALS,
         });
       }
+
+      delete user["password"];
       return res.status(statusCodes.OK).json({
         success: true,
         data: {
@@ -234,6 +234,26 @@ module.exports.refreshToken = (req, res) => {
       });
     }
   });
+};
 
-}
+module.exports.getProfile = async (req, res) => {
+  let loggedUserId = await getLoggedUserId(req.headers.authorization);
 
+  User.findOne({ _id: loggedUserId })
+    .then((user) => {
+      return res.status(statusCodes.OK).json({
+        success: true,
+        data: {
+          user,
+        },
+      });
+    })
+    .catch((err) => {
+      return res.status(statusCodes.SERVER_ERROR).json({
+        success: false,
+        data: {
+          message: err,
+        },
+      });
+    });
+};
