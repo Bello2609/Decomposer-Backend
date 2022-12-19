@@ -3,13 +3,17 @@ const {
   register,
   login,
   refreshToken,
+  forgetPassword,
+  getNewPassword,
   getProfile,
-} = require("../../controller/auth");
+} = require("../../controller/Auth/auth");
 const { authorize } = require("../../middleware/authorize");
 const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
+router.post("/forgetPassword", forgetPassword);
+router.post("/getNewPassword", getNewPassword);
 router.get("/refresh", authorize, refreshToken);
 router.get("/profile", authorize, getProfile);
 router.get("/", (req, res) => {

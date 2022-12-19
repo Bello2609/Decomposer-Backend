@@ -51,6 +51,7 @@ const userSchema = new Schema(
       default: false,
       required: true,
     },
+
     userToken: String,
     userTokenExpiration: Date,
   },
