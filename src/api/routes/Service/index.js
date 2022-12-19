@@ -1,19 +1,21 @@
 const { Router } = require("express");
 const {
-  addService,
+  createService,
   deleteService,
   myServices,
   oneService,
   updateService,
   updateServiceMedia,
+  allServices,
 } = require("../../controller/Service");
 const { authorize } = require("../../middleware/authorize");
 const authorizeSellerOnly = require("../../middleware/authorizeSellerOnly");
 const router = Router();
 
-router.post("/create", [authorize, authorizeSellerOnly], addService);
+router.get("/oneService/:id", oneService); // anyone can view service
+router.get("/allServices", allServices); // anyone can view service
+router.post("/create", [authorize, authorizeSellerOnly], createService);
 router.get("/myServices", [authorize, authorizeSellerOnly], myServices);
-router.get("/oneService/:id", [authorize, authorizeSellerOnly], oneService);
 router.put(
   "/updateService/:id",
   [authorize, authorizeSellerOnly],

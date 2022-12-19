@@ -2,10 +2,23 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
+const mediaSchema = new Schema({
+  url: {
+    type: String,
+    required: true,
+  },
+  public_id: {
+    type: String,
+    required: true,
+    select: false,
+  },
+});
+
 const serviceSchema = new Schema(
   {
     user_id: {
       type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     title: {
@@ -24,15 +37,7 @@ const serviceSchema = new Schema(
       type: String,
       required: true,
     },
-    media: {
-      type: String,
-      required: true,
-    },
-    public_id: {
-      type: String,
-      required: true,
-      select: false,
-    },
+    media: mediaSchema,
   },
   { timestamps: true }
 );

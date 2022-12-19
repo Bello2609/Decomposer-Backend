@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const registerSchema = require("../../validationSchema/registerSchema");
 const jwt = require("jsonwebtoken");
+
 //constant
 const statusMessages = require("../../constants/messages");
 const statusCodes = require("../../constants/status");

@@ -14,7 +14,73 @@ cloudinary.config({
   api_secret: CONFIG.CLOUDINARY_API_SECRET,
 });
 
-module.exports.addService = (req, res) => {
+module.exports.allServices = (req, res) => {
+  Service.find({}).exec((err, service) => {
+    if (err) {
+      return res.status(statusCodes.SERVER_ERROR).json({
+        success: false,
+        data: {
+          message: err,
+        },
+      });
+    }
+
+    if (!service || service.length === 0) {
+      return res.status(statusCodes.NOT_FOUND).json({
+        success: false,
+        data: {
+          message: "No service found",
+        },
+      });
+    }
+
+    return res.status(statusCodes.OK).json({
+      success: true,
+      data: { services: service },
+    });
+  });
+};
+
+module.exports.oneService = (req, res) => {
+  //check for valid object Id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(statusCodes.BAD_REQUEST).json({
+      success: false,
+      data: {
+        message: "Invalid id",
+      },
+    });
+  }
+
+  Service.findById(req.params.id).exec(async (err, service) => {
+    if (err) {
+      return res.status(statusCodes.SERVER_ERROR).json({
+        success: false,
+        data: {
+          message: err,
+        },
+      });
+    }
+
+    if (!service) {
+      return res.status(statusCodes.NOT_FOUND).json({
+        success: false,
+        data: {
+          message: "No service found",
+        },
+      });
+    }
+
+    return res.status(statusCodes.OK).json({
+      success: true,
+      data: {
+        service,
+      },
+    });
+  });
+};
+
+module.exports.createService = (req, res) => {
   const form = formidable();
 
   form.parse(req, (err, fields, files) => {
@@ -71,8 +137,10 @@ module.exports.addService = (req, res) => {
           price: fields.price,
           duration: fields.duration,
           description: fields.description,
-          media: result.secure_url,
-          public_id: result.public_id,
+          media: {
+            url: result.secure_url,
+            public_id: result.public_id,
+          },
         });
 
         service.save((err, saved) => {
@@ -91,52 +159,11 @@ module.exports.addService = (req, res) => {
             data: {
               message: "Service added successfully",
               service: saved,
-              result,
             },
           });
         });
       }
     );
-  });
-};
-
-// only owned service
-module.exports.oneService = (req, res) => {
-  //check for valid object Id
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(statusCodes.BAD_REQUEST).json({
-      success: false,
-      data: {
-        message: "Invalid id",
-      },
-    });
-  }
-
-  Service.findById(req.params.id).exec(async (err, service) => {
-    if (err) {
-      return res.status(statusCodes.SERVER_ERROR).json({
-        success: false,
-        data: {
-          message: err,
-        },
-      });
-    }
-
-    if (!service) {
-      return res.status(statusCodes.NOT_FOUND).json({
-        success: false,
-        data: {
-          message: "No service found",
-        },
-      });
-    }
-
-    return res.status(statusCodes.OK).json({
-      success: true,
-      data: {
-        service,
-      },
-    });
   });
 };
 
@@ -230,7 +257,6 @@ module.exports.deleteService = (req, res) => {
     });
 };
 
-// owner of service can only update
 module.exports.updateService = (req, res) => {
   let { title, price, duration, description } = req.body;
   if (Object.keys(req.body).length === 0) {
@@ -281,6 +307,7 @@ module.exports.updateService = (req, res) => {
             success: true,
             data: {
               service: updatedService,
+              message: "Service updated successfully",
             },
           });
         });
@@ -317,68 +344,76 @@ module.exports.updateServiceMedia = (req, res) => {
         },
       });
 
-    Service.findById(req.params.id).then(async (service) => {
-      if (!service) {
-        return res.status(statusCodes.NOT_FOUND).json({
-          success: false,
-          data: {
-            message: "Service not found",
+    Service.findById(req.params.id)
+      .select("+media.public_id")
+      .then(async (service) => {
+        if (!service) {
+          return res.status(statusCodes.NOT_FOUND).json({
+            success: false,
+            data: {
+              message: "Service not found",
+            },
+          });
+        }
+
+        //is logged in user the owner
+        let loggedUserId = await getLoggedUserId(req.headers.authorization);
+        if (String(loggedUserId) != String(service.user_id)) {
+          return res.status(statusCodes.FORBIDDEN).json({
+            success: false,
+            data: {
+              message: statusMessages.FORBIDDEN,
+            },
+          });
+        }
+
+        //delete media
+        await cloudinary.uploader.destroy(service.media.public_id);
+
+        // save media
+        cloudinary.uploader.upload(
+          files.media.filepath,
+          {
+            folder: "decomposer",
           },
-        });
-      }
-
-      //is logged in user the owner
-      let loggedUserId = await getLoggedUserId(req.headers.authorization);
-      if (String(loggedUserId) != String(service.user_id)) {
-        return res.status(statusCodes.FORBIDDEN).json({
-          success: false,
-          data: {
-            message: statusMessages.FORBIDDEN,
-          },
-        });
-      }
-
-      // save media
-      cloudinary.uploader.upload(
-        files.media.filepath,
-        {
-          folder: "decomposer",
-          public_id: service.public_id,
-          invalidate: true,
-        },
-        async (err, result) => {
-          if (err) {
-            return res.status(statusCodes.SERVER_ERROR).json({
-              success: false,
-              data: {
-                message: "Media could not upload",
-              },
-            });
-          }
-
-          service.media = result.secure_url;
-
-          service.save((err, saved) => {
+          async (err, result) => {
             if (err) {
               return res.status(statusCodes.SERVER_ERROR).json({
                 success: false,
                 data: {
-                  message: "Service media could not be updated",
-                  err,
+                  message: "Media could not upload",
                 },
               });
             }
 
-            return res.status(statusCodes.CREATED).json({
-              success: true,
-              data: {
-                message: "Service media updated successfully",
-                service: saved,
-              },
+            const media = {
+              url: result.secure_url,
+              public_id: result.public_id,
+            };
+
+            service.media = media;
+
+            service.save((err, saved) => {
+              if (err) {
+                return res.status(statusCodes.SERVER_ERROR).json({
+                  success: false,
+                  data: {
+                    message: "Service media could not be updated",
+                    err,
+                  },
+                });
+              }
+
+              return res.status(statusCodes.CREATED).json({
+                success: true,
+                data: {
+                  message: "Service media updated successfully",
+                  service: saved,
+                },
+              });
             });
-          });
-        }
-      );
-    });
+          }
+        );
+      });
   });
 };
