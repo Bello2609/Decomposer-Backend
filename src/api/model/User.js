@@ -21,6 +21,7 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     role: {
       type: String,
@@ -53,10 +54,8 @@ const userSchema = new Schema(
 
     userToken: String,
     userTokenExpiration: Date,
-   },
-   {timestamps: true}
-
-
+  },
+  { timestamps: true }
 );
 
 // Create Session for user
