@@ -10,6 +10,6 @@ const reviewSchema = new Schema({
         type: String,
         required: true
     },
-    createdAt: Date.now()
-})
+   
+}, {timestamps: true})
 module.exports = mongoose.model("Review", reviewSchema);

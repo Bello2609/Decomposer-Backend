@@ -2,7 +2,7 @@ const { Router } = require("express");
 const authRoutes = require("./Auth/auth");
 const orderRoutes = require("./Order/index");
 const serviceRoutes = require("./Service/index");
-const reviewRoutes = require("./Review/Review");
+const reviewRoutes = require("./Review/review");
 const router = Router();
 
 router.use("/auth", authRoutes);

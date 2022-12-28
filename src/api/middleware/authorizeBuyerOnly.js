@@ -20,7 +20,7 @@ module.exports = (req, res, next) => {
         return res.status(status.FORBIDDEN).json({
           status: false,
           data: {
-            message: "Action Forbidden. Only buyers can create order",
+            message: "Action Forbidden. This action is for buyer only !!!",
           },
         });
       }
