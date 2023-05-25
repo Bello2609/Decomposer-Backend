@@ -1,4 +1,4 @@
-const { Strategy } = require("passport-google-oauth20");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
 const config = require("./src/config");
 const User = require("./src/api/model/User");
@@ -17,8 +17,8 @@ const User = require("./src/api/model/User");
 //     )
 // );
 passport.use(new Strategy({
-    clientID: config.CLIENT_ID,
-    clientSecret: config.CLIENT_SECRET,
+    clientID: config.GOOGLE_CLIENT_ID,
+    clientSecret: config.GOOGLE_CLIENT_SECRET,
     callbackURL: `v1/auth/google/callback`,
     passReqToCallback   : true
   },

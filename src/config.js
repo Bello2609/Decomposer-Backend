@@ -10,6 +10,6 @@ module.exports = {
   TWILLO_EMAIL_API: process.env.TWILLO_EMAIL_API,
   FROM: process.env.FROM,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-  CLIENT_ID: process.env.CLIENT_ID,
-  CLIENT_SECRET: process.env.CLIENT_SECRET
+  GOOGLE_CLIENT_ID: process.env.CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.CLIENT_SECRET
 };
