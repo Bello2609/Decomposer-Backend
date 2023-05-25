@@ -16,7 +16,7 @@ const User = require("./src/api/model/User");
 //         }
 //     )
 // );
-passport.use(new Strategy({
+passport.use(new GoogleStrategy({
     clientID: config.GOOGLE_CLIENT_ID,
     clientSecret: config.GOOGLE_CLIENT_SECRET,
     callbackURL: `v1/auth/google/callback`,
