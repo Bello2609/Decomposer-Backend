@@ -4,6 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const passport = require("passport");
 require("./passport");
+require("dotenv").config();
 
 //routes
 const routes = require("./src/api/routes");
