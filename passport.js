@@ -2,7 +2,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passport = require("passport");
 const config = require("./src/config");
 const User = require("./src/api/model/User");
-
+require("dotenv").config();
 // passport.use(
 //     new Strategy({
 //         clientID: config.CLIENT_ID,
@@ -17,8 +17,8 @@ const User = require("./src/api/model/User");
 //     )
 // );
 passport.use(new GoogleStrategy({
-    clientID: config.GOOGLE_CLIENT_ID,
-    clientSecret: config.GOOGLE_CLIENT_SECRET,
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: `v1/auth/google/callback`,
     passReqToCallback   : true
   },
