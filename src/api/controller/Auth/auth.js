@@ -9,16 +9,17 @@ const statusMessages = require("../../constants/messages");
 const statusCodes = require("../../constants/status");
 //utils
 const { checkPassword, hashPassword } = require("../../../utils/passwordUtil");
-const { sendEmail } = require("../../../utils/emailUtils");
+const { forgetEmail, sendVerify } = require("../../../utils/emailUtils");
 const { getLoggedUserId } = require("../../../utils/generalUtils");
 const config = require("../../../config");
+const passport = require("passport");
 
 module.exports.register = async (req, res, next) => {
   const { name, email, password, role } = req.body;
   try {
     //check if the user already regsiter
-    const checkUser = await User.find({ email }).exec();
-    if (checkUser.length > 1) {
+    const checkUser = await User.findOne({ email: email }).exec();
+    if (checkUser) {
       return res.status(409).json({
         data: {
           message: "This email already existed",
@@ -85,9 +86,9 @@ module.exports.forgetPassword = async (req, res, next) => {
       const user = await User.findOne({ email: email });
 
       //this will get the name of the user we wanna send the mail to
-      const getName = user.map((users) => {
-        return users.name;
-      });
+      // const getName = user.map((users) => {
+      //   return users.name;
+      // });
       if (!user) {
         return res.status(404).json({
           data: {
@@ -98,7 +99,7 @@ module.exports.forgetPassword = async (req, res, next) => {
       user.userToken = token;
       user.userTokenExpiration = Date.now() + 3600000;
       await user.save();
-      sendEmail(getName, email, token);
+      forgetEmail(user.email, email, token);
     });
   } catch (err) {
     return res.status(501).json({
@@ -152,7 +153,9 @@ module.exports.login = (req, res) => {
       if (!user || !(await checkPassword(user["password"], password))) {
         return res.status(statusCodes.BAD_REQUEST).json({
           succes: false,
-          message: statusMessages.INVALID_CREDENTIALS,
+          data: {
+            message: statusMessages.INVALID_CREDENTIALS
+          }
         });
       }
 
@@ -174,7 +177,18 @@ module.exports.login = (req, res) => {
       });
     });
 };
-
+// login with google
+module.exports.signInWithGoogle = (req, res, next)=>{
+  passport.authenticate("google", {
+    successRedirect: "/profile",
+    failureRedirect: "/login"
+  })
+} 
+module.exports.google = (req, res, next)=>{
+  passport.authenticate("google", {
+    scope: ["email", "profile"]
+  })
+}
 module.exports.refreshToken = (req, res) => {
   let token = req.headers.authorization
     ? req.headers.authorization.split(" ")[1]
@@ -221,3 +235,55 @@ module.exports.getProfile = async (req, res) => {
       });
     });
 };
+module.exports.verifyUser = async (req, res, next)=>{
+  const { email } = req.body;
+  try{
+    let getUserId = await getLoggedUserId(req.headers.authorization);
+    const user = await User.findById({_id: getUserId}).exec();
+    console.log(user);
+    if(user.email != email){
+      return res.status(404).json({
+        data: {
+          message: "Sorry the email you provided does not match"
+        }
+      })
+    }
+    crypto.randomBytes(12, (err, buffer)=>{
+      if(err){
+        return res.status(400).json({
+          data: {
+            message: err.message
+          }
+  
+        })
+      }
+      const token = buffer.toString("hex");
+      user.userToken = token;
+      user.userTokenExpiration = Date.now() + 3600000;
+      user.save((err, save)=>{
+        if(err){
+          return res.status(400).json({
+              data: {
+                message: err.message
+              }
+          })
+        }
+        sendVerify(user.name, user.email, token );
+        return res.status(200).json({
+          data: {
+            message: "You have been sent a verification email"
+          }
+        })
+
+      })
+      
+    });
+  }catch(err){
+      return res.status(500).json({
+        data: {
+          message: err.message
+        }
+      })
+  }
+
+}

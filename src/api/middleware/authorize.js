@@ -2,7 +2,8 @@ const config = require("../../config");
 const statusCodes = require("../constants/status");
 const jwt = require("jsonwebtoken");
 
-module.exports.authorize = (req, res, next) => {
+
+module.exports.authorize = async (req, res, next) => {
   let token = req.headers.authorization;
   if (typeof token !== "undefined") {
     token = token.split(" ")[1];

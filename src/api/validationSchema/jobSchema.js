@@ -5,6 +5,6 @@ const jobSchema = Joi.object({
     category: Joi.string().required(),
     jobType: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required()
+    media: Joi.string().required()
 });
 module.exports = jobSchema;

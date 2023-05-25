@@ -55,7 +55,7 @@ module.exports.postReview = async( req, res, next )=>{
             })
         }
     }catch(err){
-        return res.status(404).json({
+        return res.status(400).json({
             data: {
                 message: err.message
             }
