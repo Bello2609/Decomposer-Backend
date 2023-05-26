@@ -13,10 +13,10 @@ const {
 const { authorize } = require("../../middleware/authorize");
 const router = express.Router();
 
-router.post("/register", register);
-router.post("/login", login);
 router.get("/google/callback", signInWithGoogle);
 router.get("/google", google);
+router.post("/register", register);
+router.post("/login", login);
 router.post("/verifyUser", authorize, verifyUser);
 router.post("/forgetPassword", forgetPassword);
 router.post("/getNewPassword", getNewPassword);

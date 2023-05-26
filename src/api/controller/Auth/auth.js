@@ -180,8 +180,8 @@ module.exports.login = (req, res) => {
 // login with google
 module.exports.signInWithGoogle = (req, res, next)=>{
   passport.authenticate("google", {
-    successRedirect: "/profile",
-    failureRedirect: "/login"
+    successRedirect: "http://localhost:3000/profile",
+    failureRedirect: "http://localhost:3000/login"
   })
 } 
 module.exports.google = (req, res, next)=>{
