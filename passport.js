@@ -1,37 +1,44 @@
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const passport = require("passport");
-const config = require("./src/config");
-const User = require("./src/api/model/User");
-require("dotenv").config();
-// passport.use(
-//     new Strategy({
-//         clientID: config.CLIENT_ID,
-//         clientSecret: config.CLIENT_SECRET,
-//         callbackURL: `v1/auth/google/callback`,
-//         passReqToCallback: true
-//     },
-//         async (accessToken, refreshToken, profile, cb)=>{
+// const GoogleStrategy = require('passport-google-oauth20').Strategy;
+// const passport = require("passport");
+// const config = require("./src/config");
+// const User = require("./src/api/model/User");
+// require("dotenv").config();
+// passport.use(new GoogleStrategy({
+//     clientID: process.env.GOOGLE_CLIENT_ID,
+//     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//     callbackURL: `http://localhost:9000/api/v1/auth/google/callback`,
+//     passReqToCallback: true
+//   },
+//   function(request, accessToken, refreshToken, profile, done) {
+//     // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+//     //   return done(err, user);
+//     // });
+//     return done(err, done)
+//   }
+// ));
+// passport.serializeUser((profile, cb)=>{ 
+//     cb(null, profile);
+// });
+// passport.deserializeUser((profile, cb)=>{
+//     cb(null, profile);
+// })
+const passport = require('passport')
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-//             return cb(err, profile);
-//         }
-//     )
-// );
+passport.serializeUser((user,done) => {
+    done(null, user.id);
+});
+passport.deserializeUser((user,done) => {
+    done(null, user.id);
+});
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `http://localhost:9000/api/v1/auth/google/callback`,
-    passReqToCallback   : true
+    callbackURL: `http://localhost:9000/google/callback`
   },
-  function(request, accessToken, refreshToken, profile, done) {
-    // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-    //   return done(err, user);
-    // });
-    return done(err, done)
+  function(accessToken, refreshToken, profile, cb) {
+   // Register user here.
+   const details = profile._json;
+   cb(null,profile);
   }
 ));
-passport.serializeUser((profile, cb)=>{ 
-    cb(null, profile);
-});
-passport.deserializeUser((profile, cb)=>{
-    cb(null, profile);
-})

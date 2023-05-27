@@ -3,20 +3,18 @@ const morgan = require("morgan");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const passport = require("passport");
+const session = require('express-session');
 require("./passport");
 require("dotenv").config();
 
 //routes
 const routes = require("./src/api/routes");
-
 const app = express();
-
 app.use(cors());
 app.set("view engine", "ejs");
 app.use(morgan(":method :url :status :user-agent - :response-time ms"));
 app.use(bodyParser.json());
 app.use(passport.initialize());
-
 //jwt middleware
 // app.use((req, res, next)=>{
 //   let token = req.headers.authorization;
@@ -29,7 +27,15 @@ app.use(passport.initialize());
 // })
 //routes
 app.use("/api/v1", routes);
-
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false
+  }));
+app.get("/google",passport.authenticate("google",{scope: ["profile","email"]}));
+app.get('/google/callback',
+  passport.authenticate('google',{sucessRedirect: `https://decomposer.vercel.app/user-profile`,failureRedirect:'https://decomposer.vercel.app//login'})
+)
 // Base route
 app.get("/", (req, res) => {
   return res.status(200).json({
@@ -38,7 +44,6 @@ app.get("/", (req, res) => {
     timestamp: Date.now(),
   });
 });
-
 // Undefined route
 app.use("*", (req, res) => {
   return res.status(404).json({
