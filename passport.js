@@ -34,7 +34,7 @@ passport.deserializeUser((user,done) => {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `http://localhost:9000/google/callback`
+    callbackURL: `https://decomposer.onrender.com/google/callback`
   },
   function(accessToken, refreshToken, profile, cb) {
    // Register user here.
