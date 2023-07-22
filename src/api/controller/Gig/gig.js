@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const Gig = require("../../model/Gig");
 const config = require("../../../config");
+const getLoggedUserId = require("../../../utils/generalUtils");
 module.exports.postReview = async( req, res, next )=>{
     try{
         let token = req.headers.authorization;
@@ -64,6 +65,8 @@ module.exports.postReview = async( req, res, next )=>{
     
 }
 module.exports.getAllReview = async( req, res, next )=>{
+    const userToken = req.headers.authorization
+    const loggedUserId = await getLoggedUserId(userToken);
     const review = await Gig.find({}).populate("buyerName").exec();
     if(review.lenght < 1){
         res.status(404).json({

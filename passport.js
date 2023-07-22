@@ -1,7 +1,7 @@
 // const GoogleStrategy = require('passport-google-oauth20').Strategy;
 // const passport = require("passport");
 // const config = require("./src/config");
-// const User = require("./src/api/model/User");
+const User = require("./src/api/model/User");
 // require("dotenv").config();
 // passport.use(new GoogleStrategy({
 //     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -36,9 +36,23 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: `https://decomposer.onrender.com/google/callback`
   },
-  function(accessToken, refreshToken, profile, cb) {
+  async(accessToken, refreshToken, profile, cb)=>{
    // Register user here.
-   const details = profile._json;
-   cb(null,profile);
+    const user = await User.find({ "email": profile._json.email });
+    if(!user){
+      const userInfo = {
+        name: profile._json.name,
+        email: profile._json.email,
+        password: "sdnjks",
+        role: "buyer",
+        isVerified: false
+      }
+      const userSave = new User(userInfo);
+      userSave.save();
+      cb(null, profile);
+    }
+    //if the user exist it will create a token for the user
+      User.createSessionToken(user._id, user.role);
+     cb(null,profile);
   }
 ));
