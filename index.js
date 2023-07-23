@@ -35,7 +35,7 @@ app.use(session({
   //successRedirect: `https://decomposer.vercel.app/user-profile`
 app.get("/google",passport.authenticate("google",{scope: ["profile","email"]}));
 app.get('/google/callback',
-  passport.authenticate('google', { successRedirect: `https://decomposer.vercel.app/user-profile`, failureRedirect:'https://decomposer.vercel.app/login'})
+  passport.authenticate('google', { successRedirect: `http://localhost:3000/user-profile`, failureRedirect:'http://localhost:3000/login'})
 )
 // Base route
 app.get("/", (req, res) => {

@@ -38,21 +38,21 @@ passport.use(new GoogleStrategy({
   },
   async(accessToken, refreshToken, profile, cb)=>{
    // Register user here.
-    const user = await User.find({ "email": profile._json.email });
-    if(!user){
-      const userInfo = {
-        name: profile._json.name,
-        email: profile._json.email,
-        password: "sdnjks",
-        role: "buyer",
-        isVerified: false
-      }
-      const userSave = new User(userInfo);
-      userSave.save();
-      cb(null, profile);
-    }
-    //if the user exist it will create a token for the user
-      User.createSessionToken(user._id, user.role);
+    // const user = await User.find({ "email": profile._json.email });
+    // if(!user){
+    //   const userInfo = {
+    //     name: profile._json.name,
+    //     email: profile._json.email,
+    //     password: "sdnjks",
+    //     role: "buyer",
+    //     isVerified: false
+    //   }
+    //   const userSave = new User(userInfo);
+    //   userSave.save();
+    //   cb(null, profile);
+    // }
+    // //if the user exist it will create a token for the user
+    //   User.createSessionToken(user._id, user.role);
      cb(null,profile);
   }
 ));
